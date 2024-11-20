@@ -1,64 +1,100 @@
+// lib/pages/restaurant_detail.dart
+
 import 'package:flutter/material.dart';
 import 'package:responsi/data/restaurant.dart';
-import 'package:responsi/services/api.dart';
 
-class RestaurantDetailsPage extends StatefulWidget {
-  final int restaurantId;
+class RestaurantDetailPage extends StatefulWidget {
+  final Restaurant restaurant;
+  final Function(Restaurant) toggleFavorite;
+  final bool isFavorite;
 
-  RestaurantDetailsPage(this.restaurantId);
+  RestaurantDetailPage({
+    required this.restaurant,
+    required this.toggleFavorite,
+    required this.isFavorite,
+  });
 
   @override
-  _RestaurantDetailsPageState createState() => _RestaurantDetailsPageState();
+  _RestaurantDetailPageState createState() => _RestaurantDetailPageState();
 }
 
-class _RestaurantDetailsPageState extends State<RestaurantDetailsPage> {
-  Restaurant? _restaurant;
+class _RestaurantDetailPageState extends State<RestaurantDetailPage> {
+  bool? _isFavorite; // Menyimpan status favorit lokal
 
   @override
   void initState() {
     super.initState();
-    _fetchRestaurantDetails();
-  }
-
-  Future<void> _fetchRestaurantDetails() async {
-    try {
-      final data = await API.getRestaurantDetails(widget.restaurantId);
-      setState(() {
-        _restaurant = Restaurant.fromJson(data);
-      });
-    } catch (e) {
-      print('Error fetching article details: $e');
-    }
+    _isFavorite = widget.isFavorite; // Inisialisasi status favorit
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_restaurant == null) {
-      return Scaffold(
-        appBar: AppBar(
-          title: Text('Restaurants Details'),
-        ),
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(
-        title: Text(_restaurant!.name),
+        title: Text(
+          widget.restaurant.name,
+          style: TextStyle(color: Colors.white),
+        ),
+        backgroundColor: const Color.fromARGB(255, 42, 36, 36),
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(_restaurant!.name),
-            SizedBox(height: 16.0),
-            Text(_restaurant!.city),
-            SizedBox(height: 16.0),
-            Text(_restaurant!.description),
-            SizedBox(height: 16.0),
+            // Mengatur tinggi gambar agar lebih kecil
+            Image.network(
+              'https://restaurant-api.dicoding.dev/images/medium/${widget.restaurant.pictureId}',
+              fit: BoxFit.cover,
+              height: 200, // Mengatur tinggi gambar
+              width:
+                  double.infinity, // Mengatur lebar gambar agar memenuhi ruang
+            ),
+            SizedBox(height: 16),
+            Text(
+              widget.restaurant.name,
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'City: ${widget.restaurant.city}',
+              style: TextStyle(fontSize: 18),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Rating: ${widget.restaurant.rating}',
+              style: TextStyle(fontSize: 18),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Description:',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            SizedBox(height: 8),
+            Text(
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.', // Ganti dengan deskripsi yang sesuai jika ada.
+              style: TextStyle(fontSize: 16),
+            ),
+            SizedBox(height: 16),
+            // Ikon love di dalam halaman detail
+            Center(
+              child: IconButton(
+                icon: Icon(
+                  _isFavorite! ? Icons.favorite : Icons.favorite_border,
+                  color: _isFavorite! ? Colors.red : Colors.grey,
+                  size: 30, // Ukuran ikon
+                ),
+                onPressed: () {
+                  setState(() {
+                    _isFavorite =
+                        !_isFavorite!; // Mengubah status favorit lokal
+                  });
+                  widget.toggleFavorite(
+                      widget.restaurant); // Memanggil fungsi toggle
+                },
+              ),
+            ),
           ],
         ),
       ),
