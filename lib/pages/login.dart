@@ -22,7 +22,13 @@ class _LoginPageState extends State<LoginPage> {
     await Future.delayed(Duration(seconds: 3));
 
     Navigator.push(
-        context, MaterialPageRoute(builder: (context) => ListPage()));
+      context,
+      MaterialPageRoute(
+        builder: (context) => ListPage(
+          username: username,
+        ),
+      ),
+    );
   }
 
   @override
